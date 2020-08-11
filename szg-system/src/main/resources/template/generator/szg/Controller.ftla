@@ -1,0 +1,102 @@
+package ${package}.rest;
+
+import com.hand.hls.aop.log.Log;
+import ${package}.domain.${className};
+import ${package}.service.${className}Service;
+import ${package}.service.dto.${className}QueryCriteria;
+<#if hasGetApi>
+import org.springframework.data.domain.Pageable;
+</#if>
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+<#if hasExcelApi>
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+</#if>
+
+/**
+* @author ${author}
+* @date ${date}
+*/
+@Api(tags = "${apiAlias}管理")
+@RestController
+@RequestMapping("api")
+public class ${className}Controller {
+
+    @Autowired
+    private ${className}Service ${changeClassName}Service;
+    <#if hasGetApi>
+
+    @Log("分页查询${apiAlias}")
+    @ApiOperation("查询${apiAlias}")
+    @PreAuthorize("hasAnyRole('ADMIN','${upperCaseClassName}_ALL','${upperCaseClassName}_SELECT')")
+    @GetMapping(value = "/${changeClassName}")
+    public ResponseEntity<Object> get(${className}QueryCriteria criteria, Pageable pageable){
+        return new ResponseEntity<>(${changeClassName}Service.get(criteria, pageable),HttpStatus.OK);
+    }
+
+    @Log("查询${apiAlias}")
+    @ApiOperation("查询${apiAlias}")
+    @PreAuthorize("hasAnyRole('ADMIN','${upperCaseClassName}_ALL','${upperCaseClassName}_SELECT')")
+    @GetMapping(value = "/${changeClassName}/all")
+    public ResponseEntity<Object> getAll(${className}QueryCriteria criteria){
+        return new ResponseEntity<>(${changeClassName}Service.getAll(criteria), HttpStatus.OK);
+    }
+
+    @Log("主键查询${apiAlias}")
+    @ApiOperation("主键查询${apiAlias}")
+    @PreAuthorize("hasAnyRole('ADMIN','${upperCaseClassName}_ALL','${upperCaseClassName}_SELECT')")
+    @GetMapping(value = "/${changeClassName}/{${pkChangeColName}}")
+    public ResponseEntity<Object> getById(@PathVariable("${pkChangeColName}") ${pkColumnType} ${pkChangeColName}){
+        return new ResponseEntity<>(${changeClassName}Service.getById(${pkChangeColName}), HttpStatus.OK);
+     }
+            </#if>
+    <#if hasAddApi>
+
+    @Log("新增${apiAlias}")
+    @ApiOperation("新增${apiAlias}")
+    @PreAuthorize("hasAnyRole('ADMIN','${upperCaseClassName}_ALL','${upperCaseClassName}_CREATE')")
+    @PostMapping(value = "/${changeClassName}")
+    public ResponseEntity<Object> create(@Validated @RequestBody ${className} resources){
+        return new ResponseEntity<>(${changeClassName}Service.create(resources), HttpStatus.CREATED);
+    }
+    </#if>
+    <#if hasPutApi>
+
+    @Log("修改${apiAlias}")
+    @ApiOperation("修改${apiAlias}")
+    @PreAuthorize("hasAnyRole('ADMIN','${upperCaseClassName}_ALL','${upperCaseClassName}_EDIT')")
+    @PutMapping(value = "/${changeClassName}")
+    public ResponseEntity<Object> update(@Validated @RequestBody ${className} resources){
+        ${changeClassName}Service.update(resources);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    </#if>
+    <#if hasDelApi>
+
+    @Log("删除${apiAlias}")
+    @ApiOperation("删除${apiAlias}")
+    @PreAuthorize("hasAnyRole('ADMIN','${upperCaseClassName}_ALL','${upperCaseClassName}_DELETE')")
+    @DeleteMapping(value = "/${changeClassName}")
+    public ResponseEntity<Object> deleteAll(@RequestBody ${pkColumnType}[] ids) {
+        ${changeClassName}Service.deleteAll(ids);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    </#if>
+    <#if hasExcelApi>
+
+    @Log("导出EXCEL")
+    @ApiOperation("导出数据EXCEL")
+    @PreAuthorize("hasAnyRole('ADMIN','${upperCaseClassName}_ALL','${upperCaseClassName}_DOWNLOAD')")
+    @GetMapping(value = "/${changeClassName}/download")
+    public void download(HttpServletResponse response, ${className}QueryCriteria criteria) throws IOException {
+        ${changeClassName}Service.download(${changeClassName}Service.getAll(criteria), response);
+    }
+    </#if>
+}
+
